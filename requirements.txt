@@ -63,7 +63,6 @@ pyparsing
 python-dateutil
 pytz
 pytz-deprecation-shim
-pywin32
 pyzmq
 referencing
 requests
