@@ -26,25 +26,24 @@ Entre las más populares en este grupo encontramos a los proyectos que buscan pl
 
 ## Dataset
 
-Los datos son extraidos de la [API CoinGecko](https://www.coingecko.com/).
+Los datos son extraídos de la [API CoinGecko](https://www.coingecko.com/).
 
-## Data Engineering para Data Analisys
+## Análisis Exploratorio de Datos EDA
 
-Para el trabajo de **`Data Engineering`** se realizó, en líneas generales, el siguiente flujo de trabajo:
+Para el trabajo de **`EDA`** se realizó, en líneas generales, el siguiente flujo de trabajo:
 
-- Lectura del archivo JSON y creación del Data Frame.
+- Consulta de la documentación API de la página CoinGecko.
 
-- Consulta de características y calidad de datos.
+- Análisis de los endpoints para la obtención de la data.
 
-- Identificación de features importantes.
+- Elección del endpoint /coins/{id}/market_chart/range
 
-- Tratamiento de valores faltantes y posibles errores.
 
-- Transformaciones (Cambio de tipos de dato y desanidados)
+- 
 
-- Imputaciones.
+- 
 
-- Exportación de datos a un archivo parquet.
+- 
 
 El detalle y código en:
 [archivo](https://github.com/GLJaraBarth/1_Proyecto_Individual_MLOps/blob/main/steam_games_EDA_DE.ipynb)
