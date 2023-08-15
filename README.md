@@ -26,7 +26,7 @@ Entre las más populares en este grupo encontramos a los proyectos que buscan pl
 
 ## Dataset
 
-El [dataset](https://github.com/GLJaraBarth/1_Proyecto_Individual_MLOps/blob/main/steam_games.json) entregado posee información acerca de videojuegos y distintos atributos de los mismos. El mismo cuenta con 32135 registros (representando cada fila un videojuego) y 16 campos (atributos de cada video juego).
+Los datos son extraidos de la [API CoinGecko](https://www.coingecko.com/).
 
 ## Data Engineering para Data Analisys
 
