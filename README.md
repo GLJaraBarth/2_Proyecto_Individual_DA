@@ -1,17 +1,28 @@
 ![Logo](https://blog.soyhenry.com/content/images/2021/02/HEADER-BLOG-NEGRO-01.jpg)
 
 # DATA SCIENCE - PROYECTO INDIVIDUAL Nº2
-# Machine Learning Operations (MLOps)
+# Data Analytics
 
 
-Este proyecto abarca una serie de pasos para desarrollar un proceso de **`Data Engineering`** sobre un dataset de videojuegos de una plataforma multinacional y obtener un **`MVP`**  para posteriormente disponibilizar una serie de endpoints y un modelo de predicción de precio de un video juego utilizando **`Machine Learning`** a través de una **`API`**.
+Este proyecto nos sitúa en un rol de **`Analista de Datos`** en una empresa de servicios financieros para el mercado de criptomonedas.
 
 ![Logo](https://cardaniers.com/wp-content/uploads/2021/05/binance-coin.jpg)
 
 ## Contexto
 
-Se plantea desde los departamentos de Machine Learning y Analytics la necesidad de contar con los datos en una API para poder ser consumidos.
-Por otro lado, existe la necesidad de poder realizar las consultas al modelo de predicción a través de la API para solucionar un problema de negocio.
+Nuestra Empresa ha decidido incursionar en el mercado de criptomonedas y poder asesorar a nuestros Clientes respecto en cuales realizar sus inversiones de acuerdo al perfil.
+Debido al gran número de monedas del mercado y para una primera investigación, se trabajara sobre un conjunto de 10 criptomonedas.
+
+Se realizo una subdivisión de este con junto en tres categorías, según la recomendación de especialistas financieros:
+
+1 - **Monedas estables o "stablecoins"** La principal característica es el factor de tener su precio "atado" al dólar, esto significa que su valor nunca varía de u$s1 y es la ideal para quienes no son muy arriesgados. Las más populares actualmente son Tether (USDT) y USD Coin (USDC). Para Clientes con un perfil ahorrista.
+
+2 - **Monedas principales del mercado** Estas son Bitcoin (BTC) y Ethereum (ETH), con el principal argumento siendo que ambas tienden a mantener subidas constantes a largo plazo.
+
+3 - **Monedas alternativas o "altcoins"** Son diferentes criptos que no tienen una antigüedad tan larga como el Bitcoin y por eso son vistas como inversiones más arriesgadas -además de tender a ser mucho más volátiles que las criptomonedas mencionadas en el punto 2. 
+Entre las más populares en este grupo encontramos a los proyectos que buscan plantearse como alternativa a la red de contratos inteligentes establecida por Etherium -como lo son Solana (SOL), Cardano (ADA) o Avalanche (AVAX)- y las criptomonedas lanzadas por plataformas de inversión como Binance (BNB) o Crypto.com (CRO), Dogecoin(DOGE) y Shiba Inu (SHIB).
+
+[Fuente](https://www.ambito.com/finanzas/criptomonedas/ahorrar-cuales-son-las-mejores-alternativas-protegerse-la-devaluacion-n5330435)
 
 ## Dataset
 
@@ -111,7 +122,3 @@ Para el deploy de la API, se utilizó la plataforma **`Render`**.
 Los datos están listos para ser consumidos y consultados a partir del siguiente link
 
 [Link al Deployment](https://gljara-1-proyecto-mlops.onrender.com/docs#)
-
-## Video 
-
-En el [enlace](https://youtu.be/DUCHEEekHiw) se puede acceder a video expicativo del proyecto.
