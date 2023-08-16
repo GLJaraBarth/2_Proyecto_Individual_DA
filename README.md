@@ -46,12 +46,14 @@ Para el trabajo de **`EDA`** se realizó, en líneas generales, el siguiente flu
 
 - Se realizó la consulta de datos estadísticos de cada data frame.
 
+- Se realizó un análisis de las distintas monedas para plazos de inversión corto, medio y largo.
+
 El detalle y código en:
 [archivo](https://github.com/GLJaraBarth/2_Proyecto_Individual_DA/blob/main/PI_Data_Analitycs_EDA.ipynb)
 
 ## Deployment
 
-Se confecciono un dashboard y se desplego en **`Streamlit`**.
+El dashboard confeccionado y se desplego en **`Streamlit`**.
 Los datos están listos para ser consultados a partir del siguiente link
 
 [Link al Deployment](https://homepy-nnfvau8kus84x4ngiihcsj.streamlit.app/)
