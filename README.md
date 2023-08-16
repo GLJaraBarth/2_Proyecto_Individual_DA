@@ -53,7 +53,7 @@ El detalle y código en:
 
 ## Deployment
 
-El dashboard confeccionado y se desplego en **`Streamlit`**.
+El dashboard confeccionado se desplego en **`Streamlit`**.
 Los datos están listos para ser consultados a partir del siguiente link
 
 [Link al Deployment](https://homepy-nnfvau8kus84x4ngiihcsj.streamlit.app/)
