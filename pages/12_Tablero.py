@@ -3,10 +3,13 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
-from datetime import date, datetime, timedelta
 from matplotlib.ticker import MaxNLocator
-import datetime as dt
 from matplotlib.ticker import FuncFormatter
+import pandas as pd
+import csv
+import numpy as np
+import datetime as dt
+
 
 # Configurar el ancho de la página a 1000 píxeles
 st.set_page_config(layout="wide")
@@ -19,9 +22,9 @@ df.dropna(inplace=True)
 fecha_actual = dt.datetime.now()
 
 # Calcular la fecha menos 60 días
-fecha = fecha_actual - timedelta(days=60)
+fecha = fecha_actual - dt.timedelta(days=60)
 
-fecha_roi = fecha_actual - timedelta(days=365)
+fecha_roi = fecha_actual - dt.timedelta(days=365)
 
 def pricefig(df1,coin):
        
@@ -67,7 +70,7 @@ def EMA26plt(df1,coin):
     # Configurar etiquetas y título
     plt.xlabel('Fecha', fontsize=8)
     plt.ylabel('Valor USD', fontsize=8)
-    plt.title('Media Móvil Exponencial (EMA) a Corto Plazo', fontsize=10)
+    plt.title('')
 
     # Cambiar los límites del eje y
     #plt.ylim(minejey, maxejey)  # Cambiar los límites mínimo y máximo según tus necesidades
@@ -97,7 +100,7 @@ def EMA200plt(df1,coin):
     # Configurar etiquetas y título
     plt.xlabel('Fecha', fontsize=8)
     plt.ylabel('Valor USD', fontsize=8)
-    plt.title('Media Móvil Exponencial (EMA) a Largo Plazo', fontsize=10)
+    plt.title('')
     
     # Cambiar los límites del eje y
     #plt.ylim(minejey, maxejey)  # Cambiar los límites mínimo y máximo según tus necesidades
@@ -132,7 +135,7 @@ def MACD(df1,coin):
     # Configurar etiquetas y título
     plt.xlabel('Fecha', fontsize=8)
     plt.ylabel('Valor USD', fontsize=8)
-    plt.title('Media Móvil de Convergencia / Divergencia (MACD)', fontsize=10)
+    plt.title('')
     
     # Cambiar los límites del eje y
     #plt.ylim(minejey, maxejey)  # Cambiar los límites mínimo y máximo según tus necesidades
@@ -230,7 +233,7 @@ def rsi(df1,coin):
     # Configurar etiquetas y título
     plt.xlabel('Fecha', fontsize=8)
     plt.ylabel('%', fontsize=8)
-    plt.title('Índice de Fuerza Relativa (RSI)', fontsize=10)
+    plt.title('')
     
     # Cambiar los límites del eje y
     #plt.ylim(minejey, maxejey)  # Cambiar los límites mínimo y máximo según tus necesidades
@@ -274,30 +277,57 @@ def valorRSI(df1,coin):
     # Agregar un cuadro con el valor utilizando st.info()
     st.info(f"%RSI = {round(valor,2)}")
 
-def ROI(def2,coin):
-    # Obtener el valor máximo de la columna timestamp
-    filtro1 = df2['date'].iloc[-1]
 
-    # Obtener la fecha actual
-    fecha_1 = datetime.strptime(filtro1, "%d-%m-%Y")
 
-    # Calcular la fecha de un año atrás
-    fecha_2 = fecha_1 - timedelta(days=365)
+def roi(df, plazo):
+    if plazo == 30:
+        roi = 'ROI30'
+    if plazo == 90:
+        roi = 'ROI90'
+    if plazo == 180:
+        roi = 'ROI180'
 
-    # Convertir la fecha al formato deseado
-    filtro2 = fecha_2.strftime("%d-%m-%Y")
+    fig = plt.figure(figsize=(6, 3))  # Opcional: ajustar el tamaño del gráfico
 
-    # Precios de compra y venta en USD
-    precio_compra = df2[df2['date'] == filtro2]['price'].iloc[0]
-    precio_venta = df2[df2['date'] == filtro1]['price'].iloc[0]
+    # Seleccionar los últimos registros de cada categoría
+    #ultimos_registros = df.groupby('nombre').last().reset_index()
 
-    # Calcular el ROI
-    ganancia = precio_venta - precio_compra
-    costo = precio_compra
+    # Ordenar el DataFrame en función de la columna "column_name" de manera ascendente
+    df_sorted = df.sort_values(by="date", ascending=True)
 
-    roi_anual = (ganancia / costo) * 100
+    df_last = df_sorted.tail(10)
 
-    st.info(f"ROI anual: {roi_anual:.2f}%")
+    # Definir una función para determinar los colores basados en los valores de 'ROI30'
+    def color_palette(val):
+        if val < 0:
+            return 'red'
+        else:
+            return 'green'
+
+    # Crear una lista de colores basada en los valores de 'ROI30'
+    colors = [color_palette(val) for val in df_last[roi]]
+
+    # Crear el gráfico de barras con colores personalizados
+    ax = sns.barplot(data=df_last, x='nombre', y=roi, palette=colors)
+
+    plt.title(f'')  # Título con el valor del plazo
+    plt.xlabel('')
+    plt.ylabel('ROI')
+
+    # Rotar las etiquetas del eje x a 45 grados
+    plt.xticks(rotation=45)
+
+    # Ajustar automáticamente las etiquetas del eje y con control de separación
+    intervalo_etiquetas_y = 5  # Mostrar solo 5 etiquetas en el eje y
+    locator_y = plt.MaxNLocator(integer=True, nbins=intervalo_etiquetas_y)
+    plt.gca().yaxis.set_major_locator(locator_y)
+
+    # Ajustar tamaño de fuente de las etiquetas del eje x e y
+    plt.xticks(fontsize=8)
+    plt.yticks(fontsize=8)
+
+    # Mostrar el gráfico en Streamlit
+    st.pyplot(fig)
 
 
 # Crear las columnas para organizar las checkboxes en una fila
@@ -310,66 +340,75 @@ if col1.button('Avalanche'):
     fecha_inicio = fecha_actual - dt.timedelta(days=180)
     fecha_EMA26 = pd.to_datetime(fecha_inicio)
     # Convertir cada valor en la columna 'date' a un objeto Timestamp
-    df['timestamp'] = pd.to_datetime(df['date'], format="%d-%m-%Y")
+    df['timestamp'] = pd.to_datetime(df['date'])
     filtro = (df['timestamp'] >= fecha_EMA26) & (df['nombre'] == coin)
     filtro2 = df['nombre'] == coin
     df1 = df[filtro]
     df2 = df[filtro2]
     col11, col12,col13 = st.columns(3)
     with col11:
+        st.text('Media Móvil Exponencial (EMA) a Corto Plazo')
         EMA26plt(df1,coin)
     with col12:
+        st.text('Media Móvil de Convergencia / Divergencia (MACD)')
         MACD(df1,coin)
     with col13:
+        st.text('Índice de Fuerza Relativa (RSI)')
         rsi(df1,coin)
-    col14, col15, col16 = st.columns(3)
+    col14, col15 = st.columns(2)
     with col14:
-        pricefig(df1,coin)   
+        valorMACD(df1,coin)
     with col15:
-        mercapfig(df1,coin)
-    with col16:
-        volnegfig(df1,coin)
-    col17, col18,col19 = st.columns(3)
-    with col17:
-        valorMACD(df1,coin)   
-    with col18:
         valorRSI(df1,coin)
-    with col19:
-        ROI(df2,coin)
+    col16, col17,col18 = st.columns(3)
+    with col16:
+        st.text('ROI a Corto Plazo')
+        roi(df, 30)  
+    with col17:
+        st.text('ROI a Mediano Plazo')
+        roi(df, 90)
+    with col18:
+        st.text('ROI a Largo Plazo')
+        roi(df, 180)
 
 if col2.button('BNB'):
-    coin = 'Binance'
+    coin = 'BNB'
     # Filtrar el DataFrame con la condición AND
     #fecha_actual = datetime.date.today()
     fecha_inicio = fecha_actual - dt.timedelta(days=180)
     fecha_EMA26 = pd.to_datetime(fecha_inicio)
     # Convertir cada valor en la columna 'date' a un objeto Timestamp
-    df['timestamp'] = pd.to_datetime(df['date'], format="%d-%m-%Y")
+    df['timestamp'] = pd.to_datetime(df['date'])
     filtro = (df['timestamp'] >= fecha_EMA26) & (df['nombre'] == coin)
     filtro2 = df['nombre'] == coin
     df1 = df[filtro]
     df2 = df[filtro2]
     col11, col12,col13 = st.columns(3)
     with col11:
+        st.text('Media Móvil Exponencial (EMA) a Corto Plazo')
         EMA26plt(df1,coin)
     with col12:
+        st.text('Media Móvil de Convergencia / Divergencia (MACD)')
         MACD(df1,coin)
     with col13:
+        st.text('Índice de Fuerza Relativa (RSI)')
         rsi(df1,coin)
-    col14, col15, col16 = st.columns(3)
+    col14, col15 = st.columns(2)
     with col14:
-        pricefig(df1,coin)   
+        valorMACD(df1,coin)
     with col15:
-        mercapfig(df1,coin)
-    with col16:
-        volnegfig(df1,coin)
-    col17, col18,col19 = st.columns(3)
-    with col17:
-        valorMACD(df1,coin)   
-    with col18:
         valorRSI(df1,coin)
-    with col19:
-        ROI(df2,coin)
+    col16, col17,col18 = st.columns(3)
+    with col16:
+        st.text('ROI a Corto Plazo')
+        roi(df, 30)  
+    with col17:
+        st.text('ROI a Mediano Plazo')
+        roi(df, 90)
+    with col18:
+        st.text('ROI a Largo Plazo')
+        roi(df, 180)
+
 
 if col3.button('Bitcoin'):
     coin = 'Bitcoin'
@@ -378,32 +417,37 @@ if col3.button('Bitcoin'):
     fecha_inicio = fecha_actual - dt.timedelta(days=180)
     fecha_EMA26 = pd.to_datetime(fecha_inicio)
     # Convertir cada valor en la columna 'date' a un objeto Timestamp
-    df['timestamp'] = pd.to_datetime(df['date'], format="%d-%m-%Y")
+    df['timestamp'] = pd.to_datetime(df['date'])
     filtro = (df['timestamp'] >= fecha_EMA26) & (df['nombre'] == coin)
     filtro2 = df['nombre'] == coin
     df1 = df[filtro]
     df2 = df[filtro2]
     col11, col12,col13 = st.columns(3)
     with col11:
+        st.text('Media Móvil Exponencial (EMA) a Corto Plazo')
         EMA26plt(df1,coin)
     with col12:
+        st.text('Media Móvil de Convergencia / Divergencia (MACD)')
         MACD(df1,coin)
     with col13:
+        st.text('Índice de Fuerza Relativa (RSI)')
         rsi(df1,coin)
-    col14, col15, col16 = st.columns(3)
+    col14, col15 = st.columns(2)
     with col14:
-        pricefig(df1,coin)   
+        valorMACD(df1,coin)
     with col15:
-        mercapfig(df1,coin)
-    with col16:
-        volnegfig(df1,coin)
-    col17, col18,col19 = st.columns(3)
-    with col17:
-        valorMACD(df1,coin)   
-    with col18:
         valorRSI(df1,coin)
-    with col19:
-        ROI(df2,coin)
+    col16, col17,col18 = st.columns(3)
+    with col16:
+        st.text('ROI a Corto Plazo')
+        roi(df, 30)  
+    with col17:
+        st.text('ROI a Mediano Plazo')
+        roi(df, 90)
+    with col18:
+        st.text('ROI a Largo Plazo')
+        roi(df, 180)
+
 
 if col4.button('Cardano'):
     coin = 'Cardano'
@@ -412,32 +456,37 @@ if col4.button('Cardano'):
     fecha_inicio = fecha_actual - dt.timedelta(days=180)
     fecha_EMA26 = pd.to_datetime(fecha_inicio)
     # Convertir cada valor en la columna 'date' a un objeto Timestamp
-    df['timestamp'] = pd.to_datetime(df['date'], format="%d-%m-%Y")
+    df['timestamp'] = pd.to_datetime(df['date'])
     filtro = (df['timestamp'] >= fecha_EMA26) & (df['nombre'] == coin)
     filtro2 = df['nombre'] == coin
     df1 = df[filtro]
     df2 = df[filtro2]
     col11, col12,col13 = st.columns(3)
     with col11:
+        st.text('Media Móvil Exponencial (EMA) a Corto Plazo')
         EMA26plt(df1,coin)
     with col12:
+        st.text('Media Móvil de Convergencia / Divergencia (MACD)')
         MACD(df1,coin)
     with col13:
+        st.text('Índice de Fuerza Relativa (RSI)')
         rsi(df1,coin)
-    col14, col15, col16 = st.columns(3)
+    col14, col15 = st.columns(2)
     with col14:
-        pricefig(df1,coin)   
+        valorMACD(df1,coin)
     with col15:
-        mercapfig(df1,coin)
-    with col16:
-        volnegfig(df1,coin)
-    col17, col18,col19 = st.columns(3)
-    with col17:
-        valorMACD(df1,coin)   
-    with col18:
         valorRSI(df1,coin)
-    with col19:
-        ROI(df2,coin)
+    col16, col17,col18 = st.columns(3)
+    with col16:
+        st.text('ROI a Corto Plazo')
+        roi(df, 30)  
+    with col17:
+        st.text('ROI a Mediano Plazo')
+        roi(df, 90)
+    with col18:
+        st.text('ROI a Largo Plazo')
+        roi(df, 180)
+
 
 if col5.button('Dogecoin'):
     coin = 'Dogecoin'
@@ -446,32 +495,37 @@ if col5.button('Dogecoin'):
     fecha_inicio = fecha_actual - dt.timedelta(days=180)
     fecha_EMA26 = pd.to_datetime(fecha_inicio)
     # Convertir cada valor en la columna 'date' a un objeto Timestamp
-    df['timestamp'] = pd.to_datetime(df['date'], format="%d-%m-%Y")
+    df['timestamp'] = pd.to_datetime(df['date'])
     filtro = (df['timestamp'] >= fecha_EMA26) & (df['nombre'] == coin)
     filtro2 = df['nombre'] == coin
     df1 = df[filtro]
     df2 = df[filtro2]
     col11, col12,col13 = st.columns(3)
     with col11:
+        st.text('Media Móvil Exponencial (EMA) a Corto Plazo')
         EMA26plt(df1,coin)
     with col12:
+        st.text('Media Móvil de Convergencia / Divergencia (MACD)')
         MACD(df1,coin)
     with col13:
+        st.text('Índice de Fuerza Relativa (RSI)')
         rsi(df1,coin)
-    col14, col15, col16 = st.columns(3)
+    col14, col15 = st.columns(2)
     with col14:
-        pricefig(df1,coin)   
+        valorMACD(df1,coin)
     with col15:
-        mercapfig(df1,coin)
-    with col16:
-        volnegfig(df1,coin)
-    col17, col18,col19 = st.columns(3)
-    with col17:
-        valorMACD(df1,coin)   
-    with col18:
         valorRSI(df1,coin)
-    with col19:
-        ROI(df2,coin)
+    col16, col17,col18 = st.columns(3)
+    with col16:
+        st.text('ROI a Corto Plazo')
+        roi(df, 30)  
+    with col17:
+        st.text('ROI a Mediano Plazo')
+        roi(df, 90)
+    with col18:
+        st.text('ROI a Largo Plazo')
+        roi(df, 180)
+
 
 if col6.button('Ethereum'):
     coin = 'Ethereum'
@@ -480,32 +534,37 @@ if col6.button('Ethereum'):
     fecha_inicio = fecha_actual - dt.timedelta(days=180)
     fecha_EMA26 = pd.to_datetime(fecha_inicio)
     # Convertir cada valor en la columna 'date' a un objeto Timestamp
-    df['timestamp'] = pd.to_datetime(df['date'], format="%d-%m-%Y")
+    df['timestamp'] = pd.to_datetime(df['date'])
     filtro = (df['timestamp'] >= fecha_EMA26) & (df['nombre'] == coin)
     filtro2 = df['nombre'] == coin
     df1 = df[filtro]
     df2 = df[filtro2]
     col11, col12,col13 = st.columns(3)
     with col11:
+        st.text('Media Móvil Exponencial (EMA) a Corto Plazo')
         EMA26plt(df1,coin)
     with col12:
+        st.text('Media Móvil de Convergencia / Divergencia (MACD)')
         MACD(df1,coin)
     with col13:
+        st.text('Índice de Fuerza Relativa (RSI)')
         rsi(df1,coin)
-    col14, col15, col16 = st.columns(3)
+    col14, col15 = st.columns(2)
     with col14:
-        pricefig(df1,coin)   
+        valorMACD(df1,coin)
     with col15:
-        mercapfig(df1,coin)
-    with col16:
-        volnegfig(df1,coin)
-    col17, col18,col19 = st.columns(3)
-    with col17:
-        valorMACD(df1,coin)   
-    with col18:
         valorRSI(df1,coin)
-    with col19:
-        ROI(df2,coin)
+    col16, col17,col18 = st.columns(3)
+    with col16:
+        st.text('ROI a Corto Plazo')
+        roi(df, 30)  
+    with col17:
+        st.text('ROI a Mediano Plazo')
+        roi(df, 90)
+    with col18:
+        st.text('ROI a Largo Plazo')
+        roi(df, 180)
+
 
 if col7.button('EOS'):
     coin = 'EOS'
@@ -514,32 +573,37 @@ if col7.button('EOS'):
     fecha_inicio = fecha_actual - dt.timedelta(days=180)
     fecha_EMA26 = pd.to_datetime(fecha_inicio)
     # Convertir cada valor en la columna 'date' a un objeto Timestamp
-    df['timestamp'] = pd.to_datetime(df['date'], format="%d-%m-%Y")
+    df['timestamp'] = pd.to_datetime(df['date'])
     filtro = (df['timestamp'] >= fecha_EMA26) & (df['nombre'] == coin)
     filtro2 = df['nombre'] == coin
     df1 = df[filtro]
     df2 = df[filtro2]
     col11, col12,col13 = st.columns(3)
     with col11:
+        st.text('Media Móvil Exponencial (EMA) a Corto Plazo')
         EMA26plt(df1,coin)
     with col12:
+        st.text('Media Móvil de Convergencia / Divergencia (MACD)')
         MACD(df1,coin)
     with col13:
+        st.text('Índice de Fuerza Relativa (RSI)')
         rsi(df1,coin)
-    col14, col15, col16 = st.columns(3)
+    col14, col15 = st.columns(2)
     with col14:
-        pricefig(df1,coin)   
+        valorMACD(df1,coin)
     with col15:
-        mercapfig(df1,coin)
-    with col16:
-        volnegfig(df1,coin)
-    col17, col18,col19 = st.columns(3)
-    with col17:
-        valorMACD(df1,coin)   
-    with col18:
         valorRSI(df1,coin)
-    with col19:
-        ROI(df2,coin)
+    col16, col17,col18 = st.columns(3)
+    with col16:
+        st.text('ROI a Corto Plazo')
+        roi(df, 30)  
+    with col17:
+        st.text('ROI a Mediano Plazo')
+        roi(df, 90)
+    with col18:
+        st.text('ROI a Largo Plazo')
+        roi(df, 180)
+
 
 if col8.button('Solana'):
     coin = 'Solana'
@@ -548,32 +612,37 @@ if col8.button('Solana'):
     fecha_inicio = fecha_actual - dt.timedelta(days=180)
     fecha_EMA26 = pd.to_datetime(fecha_inicio)
     # Convertir cada valor en la columna 'date' a un objeto Timestamp
-    df['timestamp'] = pd.to_datetime(df['date'], format="%d-%m-%Y")
+    df['timestamp'] = pd.to_datetime(df['date'])
     filtro = (df['timestamp'] >= fecha_EMA26) & (df['nombre'] == coin)
     filtro2 = df['nombre'] == coin
     df1 = df[filtro]
     df2 = df[filtro2]
     col11, col12,col13 = st.columns(3)
     with col11:
+        st.text('Media Móvil Exponencial (EMA) a Corto Plazo')
         EMA26plt(df1,coin)
     with col12:
+        st.text('Media Móvil de Convergencia / Divergencia (MACD)')
         MACD(df1,coin)
     with col13:
+        st.text('Índice de Fuerza Relativa (RSI)')
         rsi(df1,coin)
-    col14, col15, col16 = st.columns(3)
+    col14, col15 = st.columns(2)
     with col14:
-        pricefig(df1,coin)   
+        valorMACD(df1,coin)
     with col15:
-        mercapfig(df1,coin)
-    with col16:
-        volnegfig(df1,coin)
-    col17, col18,col19 = st.columns(3)
-    with col17:
-        valorMACD(df1,coin)   
-    with col18:
         valorRSI(df1,coin)
-    with col19:
-        ROI(df2,coin)
+    col16, col17,col18 = st.columns(3)
+    with col16:
+        st.text('ROI a Corto Plazo')
+        roi(df, 30)  
+    with col17:
+        st.text('ROI a Mediano Plazo')
+        roi(df, 90)
+    with col18:
+        st.text('ROI a Largo Plazo')
+        roi(df, 180)
+
 
 if col9.button('Tether'):
     coin = 'Tether'
@@ -582,32 +651,37 @@ if col9.button('Tether'):
     fecha_inicio = fecha_actual - dt.timedelta(days=180)
     fecha_EMA26 = pd.to_datetime(fecha_inicio)
     # Convertir cada valor en la columna 'date' a un objeto Timestamp
-    df['timestamp'] = pd.to_datetime(df['date'], format="%d-%m-%Y")
+    df['timestamp'] = pd.to_datetime(df['date'])
     filtro = (df['timestamp'] >= fecha_EMA26) & (df['nombre'] == coin)
     filtro2 = df['nombre'] == coin
     df1 = df[filtro]
     df2 = df[filtro2]
     col11, col12,col13 = st.columns(3)
     with col11:
+        st.text('Media Móvil Exponencial (EMA) a Corto Plazo')
         EMA26plt(df1,coin)
     with col12:
+        st.text('Media Móvil de Convergencia / Divergencia (MACD)')
         MACD(df1,coin)
     with col13:
+        st.text('Índice de Fuerza Relativa (RSI)')
         rsi(df1,coin)
-    col14, col15, col16 = st.columns(3)
+    col14, col15 = st.columns(2)
     with col14:
-        pricefig(df1,coin)   
+        valorMACD(df1,coin)
     with col15:
-        mercapfig(df1,coin)
-    with col16:
-        volnegfig(df1,coin)
-    col17, col18,col19 = st.columns(3)
-    with col17:
-        valorMACD(df1,coin)   
-    with col18:
         valorRSI(df1,coin)
-    with col19:
-        ROI(df2,coin)
+    col16, col17,col18 = st.columns(3)
+    with col16:
+        st.text('ROI a Corto Plazo')
+        roi(df, 30)  
+    with col17:
+        st.text('ROI a Mediano Plazo')
+        roi(df, 90)
+    with col18:
+        st.text('ROI a Largo Plazo')
+        roi(df, 180)
+
 
 if col10.button('USD Coin'):
     coin = 'USD Coin'
@@ -616,29 +690,33 @@ if col10.button('USD Coin'):
     fecha_inicio = fecha_actual - dt.timedelta(days=180)
     fecha_EMA26 = pd.to_datetime(fecha_inicio)
     # Convertir cada valor en la columna 'date' a un objeto Timestamp
-    df['timestamp'] = pd.to_datetime(df['date'], format="%d-%m-%Y")
+    df['timestamp'] = pd.to_datetime(df['date'])
     filtro = (df['timestamp'] >= fecha_EMA26) & (df['nombre'] == coin)
     filtro2 = df['nombre'] == coin
     df1 = df[filtro]
     df2 = df[filtro2]
     col11, col12,col13 = st.columns(3)
     with col11:
+        st.text('Media Móvil Exponencial (EMA) a Corto Plazo')
         EMA26plt(df1,coin)
     with col12:
+        st.text('Media Móvil de Convergencia / Divergencia (MACD)')
         MACD(df1,coin)
     with col13:
+        st.text('Índice de Fuerza Relativa (RSI)')
         rsi(df1,coin)
-    col14, col15, col16 = st.columns(3)
+    col14, col15 = st.columns(2)
     with col14:
-        pricefig(df1,coin)   
+        valorMACD(df1,coin)
     with col15:
-        mercapfig(df1,coin)
-    with col16:
-        volnegfig(df1,coin)
-    col17, col18,col19 = st.columns(3)
-    with col17:
-        valorMACD(df1,coin)   
-    with col18:
         valorRSI(df1,coin)
-    with col19:
-        ROI(df2,coin)
+    col16, col17,col18 = st.columns(3)
+    with col16:
+        st.text('ROI a Corto Plazo')
+        roi(df, 30)  
+    with col17:
+        st.text('ROI a Mediano Plazo')
+        roi(df, 90)
+    with col18:
+        st.text('ROI a Largo Plazo')
+        roi(df, 180)
